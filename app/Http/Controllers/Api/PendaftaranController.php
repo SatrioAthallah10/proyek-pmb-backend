@@ -12,146 +12,90 @@ class PendaftaranController extends Controller
     public function submitPendaftaranAwal(Request $request)
     {
         $user = Auth::user();
+        $user->update($request->all());
 
-        // Validasi data (bisa ditambahkan sesuai kebutuhan)
-        $validatedData = $request->validate([
-            'namaLengkap' => 'required|string',
-            'noKtp' => 'required|string',
-            // ... tambahkan validasi lain untuk setiap field
-        ]);
-
-        // Simpan data ke user
-        $user->name = $request->namaLengkap;
-        $user->no_ktp = $request->noKtp;
-        $user->no_ponsel = $request->noPonsel;
-        $user->alamat = $request->alamat;
-        $user->tempat_lahir = $request->tempatLahir;
-        $user->tanggal_lahir = $request->tanggalLahir;
-        $user->asal_sekolah = $request->asalSekolah;
-        $user->nama_sekolah = $request->namaSekolah;
-        $user->jurusan = $request->jurusan;
-        $user->status_sekolah = $request->statusSekolah;
-        $user->alamat_sekolah = $request->alamatSekolah;
-        $user->kota_sekolah = $request->kotaSekolah;
-        $user->nilai_rata_rata = $request->nilaiRataRata;
-        $user->prodi_pilihan = $request->prodi;
-        $user->jadwal_kuliah = $request->jadwalKuliah;
-        $user->tahun_ajaran = $request->tahunAjaran;
-
-        // Update status pendaftaran
         $user->formulir_pendaftaran_status = 'Sudah Mengisi Formulir';
         $user->formulir_pendaftaran_completed = true;
-
+        $user->pembayaran_form_status = 'Belum Membayar';
         $user->save();
 
-        return response()->json(['message' => 'Data pendaftaran berhasil disimpan!']);
+        return response()->json(['message' => 'Data pendaftaran awal berhasil disimpan.']);
     }
 
     public function submitKonfirmasiPembayaran(Request $request)
     {
-        $user = Auth::user();
-
-        // Validasi input
         $request->validate([
             'buktiPembayaran' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'keterangan' => 'required|string',
-            'namaPengirim' => 'required|string',
-            'nominalTransfer' => 'required|numeric',
-            'tanggalTransfer' => 'required|date',
         ]);
 
-        // Simpan file bukti pembayaran
-        if ($request->hasFile('buktiPembayaran')) {
-            $filePath = $request->file('buktiPembayaran')->store('bukti_pembayaran', 'public');
-            $user->bukti_pembayaran_path = $filePath;
-        }
+        $user = Auth::user();
+        $path = $request->file('buktiPembayaran')->store('bukti_pembayaran', 'public');
 
-        // Simpan data lain ke database
-        $user->keterangan_pembayaran = $request->keterangan;
-        $user->nama_pengirim_transfer = $request->namaPengirim;
-        $user->nominal_transfer = $request->nominalTransfer;
-        $user->tanggal_transfer = $request->tanggalTransfer;
-
-        // Update status pendaftaran
+        // --- PERBAIKAN DI SINI ---
+        // Mengubah dari metode update() ke penyimpanan properti secara langsung
+        // untuk memastikan perubahan tersimpan sebelum response dikirim.
+        $user->bukti_pembayaran_path = $path;
         $user->pembayaran_form_status = 'Menunggu Konfirmasi';
-        $user->pembayaran_form_completed = false; // Akan menjadi true setelah admin verifikasi
+        $user->save(); // Simpan perubahan secara eksplisit
 
-        $user->save();
-
-        return response()->json(['message' => 'Konfirmasi pembayaran berhasil diunggah!']);
+        return response()->json(['message' => 'Konfirmasi pembayaran berhasil dikirim.']);
     }
 
     public function submitDaftarUlang(Request $request)
     {
         $user = Auth::user();
-
-        // Simpan semua data dari request ke user
-        // (Untuk singkatnya, saya tidak menambahkan validasi di sini,
-        // tapi ini sangat disarankan untuk produksi)
         $user->update($request->all());
 
-        // Update status pendaftaran
         $user->pengisian_data_diri_status = 'Sudah Mengisi Data Diri';
         $user->pengisian_data_diri_completed = true;
+        $user->npm_status = 'Menunggu Penerbitan NPM';
         $user->save();
 
-        return response()->json(['message' => 'Data daftar ulang berhasil disimpan!']);
+        return response()->json(['message' => 'Data daftar ulang berhasil disimpan.']);
     }
 
     public function submitKonfirmasiDaful(Request $request)
     {
-        $user = Auth::user();
-
         $request->validate([
             'buktiPembayaran' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'keterangan' => 'required|string',
-            'namaPengirim' => 'required|string',
-            'nominalTransfer' => 'required|numeric',
-            'tanggalTransfer' => 'required|date',
         ]);
 
-        if ($request->hasFile('buktiPembayaran')) {
-            $filePath = $request->file('buktiPembayaran')->store('bukti_daftar_ulang', 'public');
-            $user->bukti_daful_path = $filePath;
-        }
-
-        $user->keterangan_daful = $request->keterangan;
-        $user->nama_pengirim_daful = $request->namaPengirim;
-        $user->nominal_transfer_daful = $request->nominalTransfer;
-        $user->tanggal_transfer_daful = $request->tanggalTransfer;
-
-        // Update status pendaftaran
+        $user = Auth::user();
+        $path = $request->file('buktiPembayaran')->store('bukti_daful', 'public');
+        
+        $user->bukti_daful_path = $path;
         $user->pembayaran_daful_status = 'Menunggu Konfirmasi';
-        $user->pembayaran_daful_completed = false; // Akan jadi true setelah diverifikasi admin
-
         $user->save();
 
-        return response()->json(['message' => 'Konfirmasi pembayaran daftar ulang berhasil diunggah!']);
+        return response()->json(['message' => 'Konfirmasi daftar ulang berhasil dikirim.']);
     }
 
-    public function adminConfirmDaful(User $user)
+    public function submitHasilTes(Request $request)
     {
-        // Fungsi untuk menghasilkan NPM acak
-        // Format: 06.[tahun].[kode_prodi].[nomor_urut]
-        $tahun = date('Y');
-        $kodeProdi = '1'; // Contoh kode prodi, bisa dibuat dinamis nanti
-        $nomorUrut = str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
-        $npm = "06.{$tahun}.{$kodeProdi}.{$nomorUrut}";
+        $user = Auth::user();
+        
+        $user->tes_seleksi_status = 'Sudah Lulus Tes';
+        $user->tes_seleksi_completed = true;
+        $user->pembayaran_daful_status = 'Belum Membayar';
+        $user->save();
 
-        // Update status pembayaran daftar ulang
+        return response()->json(['message' => 'Hasil tes berhasil disimpan!']);
+    }
+
+    public function adminConfirmDafulAndGenerateNpm(User $user)
+    {
         $user->pembayaran_daful_status = 'Pembayaran Sudah Dikonfirmasi';
         $user->pembayaran_daful_completed = true;
+        
+        $tahun = substr(date('Y'), -2);
+        $kodeProdi = '07';
+        $nomorUrut = str_pad($user->id, 4, '0', STR_PAD_LEFT);
+        $npm = "06.20{$tahun}.1.{$kodeProdi}{$nomorUrut}";
 
-        // Update status NPM
         $user->npm_status = $npm;
         $user->npm_completed = true;
-
         $user->save();
 
-        return response()->json([
-            'message' => 'Pembayaran berhasil dikonfirmasi dan NPM telah diterbitkan!',
-            'user' => $user
-        ]);
+        return response()->json(['message' => 'Pembayaran dikonfirmasi dan NPM berhasil dibuat.', 'npm' => $npm]);
     }
 }
-

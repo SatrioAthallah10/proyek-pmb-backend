@@ -4,16 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Pastikan ini di-import
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     /**
      * Mengambil status pendaftaran pengguna yang sedang login secara dinamis.
+     * NAMA FUNGSI DIPERBARUI DI SINI
      */
-    public function getStatus(Request $request)
+    public function getRegistrationStatus(Request $request)
     {
-        $user = Auth::user(); // Mengambil data pengguna yang terotentikasi
+        $user = Auth::user();
 
         // Menyusun array timeline berdasarkan data dari database
         $timeline = [
