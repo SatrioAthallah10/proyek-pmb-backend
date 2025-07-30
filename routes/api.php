@@ -35,3 +35,32 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rute Admin
     Route::post('/admin/confirm-daful/{user}', [PendaftaranController::class, 'adminConfirmDafulAndGenerateNpm']);
 });
+
+Route::middleware('auth:sanctum')->prefix('rpl')->group(function () {
+    // Middleware tambahan untuk memastikan hanya user RPL yang bisa akses
+    // Route::middleware('auth.rpl')->group(function () { // Opsional, tapi sangat direkomendasikan
+
+        // Mengambil data progres pendaftaran RPL
+        Route::get('/user', [App\Http\Controllers\Api\RplDashboardController::class, 'getUserData']);
+
+        // Submit formulir-formulir pendaftaran RPL
+        Route::post('/submit-pendaftaran-awal', [App\Http\Controllers\Api\RplPendaftaranController::class, 'submitPendaftaranAwal']);
+        Route::post('/submit-konfirmasi-pembayaran', [App\Http\Controllers\Api\RplPendaftaranController::class, 'submitKonfirmasiPembayaran']);
+        Route::post('/submit-hasil-tes', [App\Http\Controllers\Api\RplPendaftaranController::class, 'submitHasilTes']);
+        Route::post('/submit-konfirmasi-daful', [App\Http\Controllers\Api\RplPendaftaranController::class, 'submitKonfirmasiDaful']);
+        Route::post('/submit-daftar-ulang', [App\Http\Controllers\Api\RplPendaftaranController::class, 'submitDaftarUlang']);
+
+    // }); // Akhir dari grup middleware auth.rpl
+    });
+
+    Route::middleware('auth:sanctum')->prefix('magister')->group(function () {
+        // Mengambil data progres pendaftaran Magister
+        Route::get('/user', [App\Http\Controllers\Api\MagisterDashboardController::class, 'getUserData']);
+
+        // Submit formulir-formulir pendaftaran Magister
+        Route::post('/submit-pendaftaran-awal', [App\Http\Controllers\Api\MagisterPendaftaranController::class, 'submitPendaftaranAwal']);
+        Route::post('/submit-konfirmasi-pembayaran', [App\Http\Controllers\Api\MagisterPendaftaranController::class, 'submitKonfirmasiPembayaran']);
+        Route::post('/submit-hasil-tes', [App\Http\Controllers\Api\MagisterPendaftaranController::class, 'submitHasilTes']);
+        Route::post('/submit-konfirmasi-daful', [App\Http\Controllers\Api\MagisterPendaftaranController::class, 'submitKonfirmasiDaful']);
+        Route::post('/submit-daftar-ulang', [App\Http\Controllers\Api\MagisterPendaftaranController::class, 'submitDaftarUlang']);
+    });
