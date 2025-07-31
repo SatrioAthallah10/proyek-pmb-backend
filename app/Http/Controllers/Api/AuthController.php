@@ -6,10 +6,105 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    // ... (method register, registerRpl, dan registerMagister tetap sama)
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'name' => $request->nama,
+            'email' => $request->email,
+            'jalur_pendaftaran' => 'reguler',
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json(['message' => 'Registrasi berhasil!', 'user' => $user], 201);
+    }
+
+    public function registerRpl(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'name' => $request->nama,
+            'email' => $request->email,
+            'jalur_pendaftaran' => 'rpl',
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json(['message' => 'Registrasi RPL berhasil!', 'user' => $user], 201);
+    }
+
+    public function registerMagister(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'name' => $request->nama,
+            'email' => $request->email,
+            'jalur_pendaftaran' => 'magister-reguler',
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json(['message' => 'Registrasi Magister berhasil!', 'user' => $user], 201);
+    }
+
+    /**
+     * Method baru khusus untuk registrasi Magister RPL.
+     */
+    public function registerMagisterRpl(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'name' => $request->nama,
+            'email' => $request->email,
+            'jalur_pendaftaran' => 'magister-rpl', // Selalu diatur sebagai 'magister-rpl'
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json(['message' => 'Registrasi Magister RPL berhasil!', 'user' => $user], 201);
+    }
+
+    // ... (method login dan logout tetap sama)
     public function login(Request $request)
     {
         $request->validate([
@@ -25,68 +120,18 @@ class AuthController extends Controller
             ]);
         }
 
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'user' => $user,
-            'access_token' => $user->createToken('api_token')->plainTextToken,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user
         ]);
     }
 
-    /**
-     * PERBAIKAN: Method ini sekarang dinamis dan menerima jalur pendaftaran dari request.
-     */
-    public function register(Request $request)
+    public function logout(Request $request)
     {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'jalur' => 'required|string', // Validasi baru untuk memastikan 'jalur' dikirim
-        ]);
-
-        $user = User::create([
-            'name' => $request->nama,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            // Menggunakan nilai 'jalur' dari request, bukan hardcode 'Reguler'
-            'jalur_pendaftaran' => $request->jalur,
-        ]);
-
-        return response()->json(['message' => 'Registrasi berhasil!']);
-    }
-
-    public function registerMagister(Request $request)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-        ]);
-
-        $user = User::create([
-            'name' => $request->nama,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'jalur_pendaftaran' => 'magister',
-        ]);
-
-        return response()->json(['message' => 'Registrasi Magister berhasil!']);
-    }
-
-    public function registerMagisterRpl(Request $request)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-        ]);
-
-        $user = User::create([
-            'name' => $request->nama,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'jalur_pendaftaran' => 'magister-rpl',
-        ]);
-
-        return response()->json(['message' => 'Registrasi Magister RPL berhasil!']);
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Successfully logged out']);
     }
 }
