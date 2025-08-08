@@ -33,6 +33,8 @@ return new class extends Migration
 
             $table->string('npm_status')->default('Belum Diproses');
             $table->boolean('npm_completed')->default(false);
+            $table->string('jenis_kelamin')->nullable();
+            $table->string('sumber_pendaftaran')->nullable();
 
             $table->string('no_ktp')->nullable();
             $table->string('no_ponsel')->nullable();

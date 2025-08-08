@@ -22,6 +22,13 @@ class User extends Authenticatable
         'email',
         'password',
         'jalur_pendaftaran',
+        'alamat',               // <-- Tambahan
+        'jenis_kelamin',        // <-- Tambahan
+        'no_ponsel',            // <-- Tambahan
+        'sumber_pendaftaran',   // <-- Tambahan
+        'nomor_brosur', // <-- TAMBAHKAN INI
+        'nama_pemberi_rekomendasi', // <-- TAMBAHKAN INI
+        'nomor_wa_rekomendasi',   // <-- TAMBAHKAN INI
 
         // --- TAMBAHAN PENTING ADA DI SINI ---
         // Semua kolom yang diisi melalui form perlu didaftarkan
