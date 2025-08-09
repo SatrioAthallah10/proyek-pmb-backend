@@ -12,16 +12,43 @@ class PendaftaranController extends Controller
     public function submitPendaftaranAwal(Request $request)
     {
         $user = Auth::user();
-        $user->update($request->all());
 
+        // Memetakan 'nama_lengkap' dari request ke kolom 'name' di database
+        $user->name = $request->input('nama_lengkap'); 
+        
+        // Memetakan sisa data dari request ke kolom database yang sesuai
+        $user->no_ktp = $request->input('no_ktp');
+        $user->no_ponsel = $request->input('no_ponsel');
+        $user->alamat = $request->input('alamat');
+
+        // --- PERBAIKAN DI SINI ---
+        // Memastikan 'tempat_lahir' diambil dari request dan disimpan
+        $user->tempat_lahir = $request->input('tempat_lahir');
+        
+        $user->tanggal_lahir = $request->input('tanggal_lahir');
+        $user->asal_sekolah = $request->input('asal_sekolah');
+        $user->nama_sekolah = $request->input('nama_sekolah');
+        $user->jurusan = $request->input('jurusan');
+        $user->status_sekolah = $request->input('status_sekolah');
+        $user->alamat_sekolah = $request->input('alamat_sekolah');
+        $user->kota_sekolah = $request->input('kota_sekolah');
+        $user->nilai_rata_rata = $request->input('nilai_rata_rata');
+        $user->prodi_pilihan = $request->input('prodi_pilihan');
+        $user->jadwal_kuliah = $request->input('jadwal_kuliah');
+        $user->tahun_ajaran = $request->input('tahun_ajaran');
+
+        // Kode Anda untuk update status dipertahankan
         $user->formulir_pendaftaran_status = 'Sudah Mengisi Formulir';
         $user->formulir_pendaftaran_completed = true;
         $user->pembayaran_form_status = 'Belum Membayar';
+        
+        // Menyimpan semua perubahan ke database
         $user->save();
 
         return response()->json(['message' => 'Data pendaftaran awal berhasil disimpan.']);
     }
 
+    // Fungsi-fungsi lain di bawah ini tidak diubah dan tetap sama seperti milik Anda
     public function submitKonfirmasiPembayaran(Request $request)
     {
         $request->validate([
@@ -31,12 +58,9 @@ class PendaftaranController extends Controller
         $user = Auth::user();
         $path = $request->file('buktiPembayaran')->store('bukti_pembayaran', 'public');
 
-        // --- PERBAIKAN DI SINI ---
-        // Mengubah dari metode update() ke penyimpanan properti secara langsung
-        // untuk memastikan perubahan tersimpan sebelum response dikirim.
         $user->bukti_pembayaran_path = $path;
         $user->pembayaran_form_status = 'Menunggu Konfirmasi';
-        $user->save(); // Simpan perubahan secara eksplisit
+        $user->save();
 
         return response()->json(['message' => 'Konfirmasi pembayaran berhasil dikirim.']);
     }

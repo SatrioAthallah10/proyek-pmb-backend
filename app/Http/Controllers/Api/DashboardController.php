@@ -9,24 +9,23 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
     /**
-     * Mengambil status pendaftaran pengguna yang sedang login secara dinamis.
-     * NAMA FUNGSI DIPERBARUI DI SINI
+     * Mengambil status pendaftaran dan data pengguna yang sedang login.
      */
     public function getRegistrationStatus(Request $request)
     {
         $user = Auth::user();
 
-        // Menyusun array timeline berdasarkan data dari database
+        // Logika Anda untuk menyusun array timeline dipertahankan
         $timeline = [
             [
                 'title' => 'Formulir Pendaftaran', 
                 'status' => $user->formulir_pendaftaran_status, 
-                'completed' => $user->formulir_pendaftaran_completed
+                'completed' => $user->formulir_pendaftaran_completed ?? $user->pendaftaran_awal
             ],
             [
                 'title' => 'Pembayaran Form Daftar', 
                 'status' => $user->pembayaran_form_status, 
-                'completed' => $user->pembayaran_form_completed
+                'completed' => $user->pembayaran_form_completed ?? $user->pembayaran
             ],
             [
                 'title' => 'Status Administrasi', 
@@ -41,7 +40,7 @@ class DashboardController extends Controller
             [
                 'title' => 'Pembayaran Daftar Ulang', 
                 'status' => $user->pembayaran_daful_status, 
-                'completed' => $user->pembayaran_daful_completed
+                'completed' => $user->pembayaran_daful_completed ?? $user->daftar_ulang
             ],
             [
                 'title' => 'Pengisian Data Diri', 
@@ -55,6 +54,11 @@ class DashboardController extends Controller
             ],
         ];
 
-        return response()->json($timeline);
+        // --- GABUNGAN PERUBAHAN DI SINI ---
+        // Mengembalikan satu objek yang berisi data user DAN data timeline
+        return response()->json([
+            'user' => $user,
+            'timeline' => $timeline
+        ]);
     }
 }

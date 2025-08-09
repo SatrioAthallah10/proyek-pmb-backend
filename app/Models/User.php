@@ -22,20 +22,19 @@ class User extends Authenticatable
         'email',
         'password',
         'jalur_pendaftaran',
-        'alamat',               // <-- Tambahan
-        'jenis_kelamin',        // <-- Tambahan
-        'no_ponsel',            // <-- Tambahan
-        'sumber_pendaftaran',   // <-- Tambahan
-        'nomor_brosur', // <-- TAMBAHKAN INI
-        'nama_pemberi_rekomendasi', // <-- TAMBAHKAN INI
-        'nomor_wa_rekomendasi',   // <-- TAMBAHKAN INI
-
-        // --- TAMBAHAN PENTING ADA DI SINI ---
-        // Semua kolom yang diisi melalui form perlu didaftarkan
+        'alamat',
+        'jenis_kelamin',
+        'sumber_pendaftaran',
+        'nomor_brosur',
+        'nama_pemberi_rekomendasi',
+        'nomor_wa_rekomendasi',
         'no_ktp',
         'no_ponsel',
-        'alamat',
+        
+        // --- PERBAIKAN DI SINI ---
+        // 'tempat_lahir' ditambahkan ke daftar agar bisa disimpan
         'tempat_lahir',
+        
         'tanggal_lahir',
         'asal_sekolah',
         'nama_sekolah',
@@ -47,13 +46,10 @@ class User extends Authenticatable
         'prodi_pilihan',
         'jadwal_kuliah',
         'tahun_ajaran',
-
         'bukti_pembayaran_path',
         'pembayaran_form_status',
-        
         'bukti_daful_path',
         'pembayaran_daful_status',
-
         'nisn', 'kewarganegaraan', 'no_telp_rumah', 'dusun', 'rt', 'rw',
         'kelurahan', 'kode_pos', 'kecamatan', 'kota', 'provinsi', 'agama',
         'jenis_tinggal', 'alat_transportasi',
@@ -61,6 +57,11 @@ class User extends Authenticatable
         'pekerjaan_ayah', 'penghasilan_ayah', 'nama_ibu', 'nik_ibu',
         'tanggal_lahir_ibu', 'pendidikan_ibu', 'pekerjaan_ibu',
         'penghasilan_ibu', 'nomor_orang_tua',
+        'nama_lengkap',
+        'pendaftaran_awal',
+        'pembayaran',
+        'daftar_ulang',
+        'is_admin',
     ];
 
     /**
@@ -83,6 +84,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'pendaftaran_awal' => 'boolean',
+            'pembayaran' => 'boolean',
+            'daftar_ulang' => 'boolean',
         ];
     }
 }
