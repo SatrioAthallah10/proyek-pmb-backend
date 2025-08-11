@@ -33,14 +33,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/submit-konfirmasi-daful', [PendaftaranController::class, 'submitKonfirmasiDaful']);
 });
 
-// Grup route khusus untuk Admin
+// --- PERBAIKAN UTAMA DI SINI ---
+// Kita ganti alias 'is.admin' dengan class IsAdmin::class secara langsung
 Route::middleware(['auth:sanctum', IsAdmin::class])->prefix('admin')->group(function () {
     // Route untuk mendapatkan semua data user
     Route::get('/users', [AdminController::class, 'index']);
-    
-    // --- PERBAIKAN DI SINI: RUTE BARU DITAMBAHKAN ---
-    // Route untuk mendapatkan data statistik
-    Route::get('/stats', [AdminController::class, 'getStats']);
 
     // Route untuk konfirmasi pendaftaran awal
     Route::put('/users/{user}/confirm-initial-registration', [AdminController::class, 'confirmInitialRegistration']);
