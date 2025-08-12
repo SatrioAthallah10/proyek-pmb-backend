@@ -61,7 +61,6 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        // Baris 59: Tambahkan middleware 'is.admin'
-        'is.admin' => \App\Http\Middleware\IsAdmin::class,
+        'is.kepala.bagian' => \App\Http\Middleware\IsAdmin::class, // <-- [PERUBAHAN]
     ];
 }

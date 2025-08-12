@@ -23,6 +23,6 @@ class IsAdmin
         }
 
         // Jika bukan admin, kembalikan response error 'Unauthorized'
-        return response()->json(['message' => 'Unauthorized'], 403);
+        return response()->json(['message' => 'Unauthorized. Anda bukan Kepala Bagian.'], 403); // <-- [PERUBAHAN]
     }
 }

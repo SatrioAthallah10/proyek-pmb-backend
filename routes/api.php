@@ -6,10 +6,9 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PendaftaranController;
 use App\Http\Controllers\Api\AdminController;
-// Import class IsAdmin secara langsung
-use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\IsAdmin; // <-- [PERBAIKAN] Tambahkan import untuk middleware
 
-// Rute Publik (sudah benar)
+// Rute Publik
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/register-rpl', [AuthController::class, 'registerRpl']);
 Route::post('/register-magister', [AuthController::class, 'registerMagister']);
@@ -25,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/registration-status', [DashboardController::class, 'getRegistrationStatus']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Rute submit form (sudah benar)
+    // Rute submit form
     Route::post('/submit-pendaftaran-awal', [PendaftaranController::class, 'submitPendaftaranAwal']);
     Route::post('/submit-konfirmasi-pembayaran', [PendaftaranController::class, 'submitKonfirmasiPembayaran']);
     Route::post('/submit-hasil-tes', [PendaftaranController::class, 'submitHasilTes']);
@@ -33,12 +32,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/submit-konfirmasi-daful', [PendaftaranController::class, 'submitKonfirmasiDaful']);
 });
 
-// Grup route khusus untuk Admin
-Route::middleware(['auth:sanctum', IsAdmin::class])->prefix('admin')->group(function () {
+// Grup route khusus untuk Kepala Bagian
+// <-- [PERBAIKAN] Panggil class middleware secara langsung, bukan alias string
+Route::middleware(['auth:sanctum', IsAdmin::class])->prefix('kepala-bagian')->group(function () {
     // Route untuk mendapatkan semua data user
     Route::get('/users', [AdminController::class, 'index']);
     
-    // --- PERBAIKAN DI SINI: RUTE BARU DITAMBAHKAN ---
     // Route untuk mendapatkan data statistik
     Route::get('/stats', [AdminController::class, 'getStats']);
 
