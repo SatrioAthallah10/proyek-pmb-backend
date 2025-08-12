@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PendaftaranController;
 use App\Http\Controllers\Api\AdminController;
-use App\Http\Middleware\IsAdmin; // <-- [PERBAIKAN] Tambahkan import untuk middleware
+use App\Http\Middleware\IsAdmin;
 
 // Rute Publik
 Route::post('/register', [AuthController::class, 'register']);
@@ -33,20 +33,15 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Grup route khusus untuk Kepala Bagian
-// <-- [PERBAIKAN] Panggil class middleware secara langsung, bukan alias string
 Route::middleware(['auth:sanctum', IsAdmin::class])->prefix('kepala-bagian')->group(function () {
-    // Route untuk mendapatkan semua data user
     Route::get('/users', [AdminController::class, 'index']);
-    
-    // Route untuk mendapatkan data statistik
     Route::get('/stats', [AdminController::class, 'getStats']);
 
-    // Route untuk konfirmasi pendaftaran awal
+    // --- RUTE BARU UNTUK FITUR POP-UP ---
+    Route::get('/users/{user}', [AdminController::class, 'getUserDetails']);
+
+    // Rute konfirmasi
     Route::put('/users/{user}/confirm-initial-registration', [AdminController::class, 'confirmInitialRegistration']);
-    
-    // Route untuk konfirmasi pembayaran
     Route::put('/users/{user}/confirm-payment', [AdminController::class, 'confirmPayment']);
-    
-    // Route untuk konfirmasi daftar ulang
     Route::put('/users/{user}/confirm-reregistration', [AdminController::class, 'confirmReRegistration']);
 });

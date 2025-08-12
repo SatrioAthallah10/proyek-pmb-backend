@@ -22,46 +22,34 @@ class User extends Authenticatable
         'email',
         'password',
         'jalur_pendaftaran',
-        'alamat',
+        'is_admin',
+        // Kolom status
+        'pendaftaran_awal',
+        'pembayaran',
+        'daftar_ulang',
+        // Kolom detail pendaftaran
+        'nama_lengkap', 'no_ktp', 'no_ponsel', 'alamat', 'tempat_lahir', 'tanggal_lahir',
+        'asal_sekolah', 'nama_sekolah', 'jurusan', 'status_sekolah', 'alamat_sekolah',
+        'kota_sekolah', 'nilai_rata_rata', 'prodi_pilihan', 'jadwal_kuliah', 'tahun_ajaran',
+        'bukti_pembayaran_path',
         'jenis_kelamin',
         'sumber_pendaftaran',
         'nomor_brosur',
         'nama_pemberi_rekomendasi',
         'nomor_wa_rekomendasi',
-        'no_ktp',
-        'no_ponsel',
-        
-        // --- PERBAIKAN DI SINI ---
-        // 'tempat_lahir' ditambahkan ke daftar agar bisa disimpan
-        'tempat_lahir',
-        
-        'tanggal_lahir',
-        'asal_sekolah',
-        'nama_sekolah',
-        'jurusan',
-        'status_sekolah',
-        'alamat_sekolah',
-        'kota_sekolah',
-        'nilai_rata_rata',
-        'prodi_pilihan',
-        'jadwal_kuliah',
-        'tahun_ajaran',
-        'bukti_pembayaran_path',
-        'pembayaran_form_status',
+        // Kolom status timeline
+        'formulir_pendaftaran_status', 'pembayaran_form_status', 'administrasi_status',
+        'tes_seleksi_status', 'pembayaran_daful_status', 'pengisian_data_diri_status', 'npm_status',
+        'formulir_pendaftaran_completed', 'pembayaran_form_completed', 'administrasi_completed',
+        'tes_seleksi_completed', 'pembayaran_daful_completed', 'pengisian_data_diri_completed',
+        // --- [PERUBAHAN] Tambahkan kolom baru di sini ---
+        'payment_uploaded_at',
+        'payment_confirmed_by',
+        'payment_confirmed_at',
         'bukti_daful_path',
-        'pembayaran_daful_status',
-        'nisn', 'kewarganegaraan', 'no_telp_rumah', 'dusun', 'rt', 'rw',
-        'kelurahan', 'kode_pos', 'kecamatan', 'kota', 'provinsi', 'agama',
-        'jenis_tinggal', 'alat_transportasi',
-        'nama_ayah', 'nik_ayah', 'tanggal_lahir_ayah', 'pendidikan_ayah',
-        'pekerjaan_ayah', 'penghasilan_ayah', 'nama_ibu', 'nik_ibu',
-        'tanggal_lahir_ibu', 'pendidikan_ibu', 'pekerjaan_ibu',
-        'penghasilan_ibu', 'nomor_orang_tua',
-        'nama_lengkap',
-        'pendaftaran_awal',
-        'pembayaran',
-        'daftar_ulang',
-        'is_admin',
+        'daful_uploaded_at',
+        'daful_confirmed_by',
+        'daful_confirmed_at',
     ];
 
     /**
@@ -88,6 +76,30 @@ class User extends Authenticatable
             'pendaftaran_awal' => 'boolean',
             'pembayaran' => 'boolean',
             'daftar_ulang' => 'boolean',
+            'formulir_pendaftaran_completed' => 'boolean',
+            'pembayaran_form_completed' => 'boolean',
+            'administrasi_completed' => 'boolean',
+            'tes_seleksi_completed' => 'boolean',
+            'pembayaran_daful_completed' => 'boolean',
+            'pengisian_data_diri_completed' => 'boolean',
+            // --- [PERUBAHAN] Tambahkan casting untuk timestamp ---
+            'payment_uploaded_at' => 'datetime',
+            'payment_confirmed_at' => 'datetime',
+            'daful_uploaded_at' => 'datetime',
+            'daful_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * --- [PERUBAHAN] Relasi untuk mengambil data admin yang mengonfirmasi ---
+     */
+    public function paymentConfirmedByAdmin()
+    {
+        return $this->belongsTo(User::class, 'payment_confirmed_by');
+    }
+
+    public function dafulConfirmedByAdmin()
+    {
+        return $this->belongsTo(User::class, 'daful_confirmed_by');
     }
 }
