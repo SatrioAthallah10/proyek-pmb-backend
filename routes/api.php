@@ -37,7 +37,10 @@ Route::middleware(['auth:sanctum', IsAdmin::class])->prefix('kepala-bagian')->gr
     Route::get('/users', [AdminController::class, 'index']);
     Route::get('/stats', [AdminController::class, 'getStats']);
 
-    // --- RUTE BARU UNTUK FITUR POP-UP ---
+    // --- RUTE BARU UNTUK MAHASISWA AKTIF ---
+    Route::get('/active-students', [AdminController::class, 'getActiveStudents']);
+
+    // Rute detail user untuk pop-up
     Route::get('/users/{user}', [AdminController::class, 'getUserDetails']);
 
     // Rute konfirmasi

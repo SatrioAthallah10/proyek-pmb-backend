@@ -13,9 +13,8 @@ class AdminController extends Controller
     /**
      * Mengambil semua data user (non-admin) dengan opsi pencarian.
      */
-    public function index(Request $request) // <-- [PERUBAHAN] Tambahkan Request
+    public function index(Request $request)
     {
-        // --- [FITUR BARU] Logika Pencarian ---
         $query = User::where('is_admin', false);
 
         if ($request->has('search') && $request->search != '') {
@@ -27,6 +26,29 @@ class AdminController extends Controller
         }
 
         $users = $query->latest()->get();
+        return response()->json($users);
+    }
+
+    /**
+     * [FUNGSI BARU] Mengambil semua data mahasiswa aktif (daftar ulang selesai).
+     */
+    public function getActiveStudents(Request $request)
+    {
+        $query = User::where('is_admin', false)
+                     ->where('daftar_ulang', true); // Filter hanya yang sudah daftar ulang
+
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                // --- [PERBAIKAN] Hapus pencarian berdasarkan 'npm' dari 'where clause' ---
+                $q->where('name', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        $users = $query->orderBy('created_at', 'desc')->get([
+            'id', 'name', 'email', 'jalur_pendaftaran'
+        ]);
+
         return response()->json($users);
     }
 
