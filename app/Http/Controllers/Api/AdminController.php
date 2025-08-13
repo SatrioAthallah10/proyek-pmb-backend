@@ -5,14 +5,28 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // <-- [PERUBAHAN] Tambahkan import Auth
+use Illuminate\Support\Facades\Auth;
 use Throwable;
 
 class AdminController extends Controller
 {
-    public function index()
+    /**
+     * Mengambil semua data user (non-admin) dengan opsi pencarian.
+     */
+    public function index(Request $request) // <-- [PERUBAHAN] Tambahkan Request
     {
-        $users = User::where('is_admin', false)->latest()->get();
+        // --- [FITUR BARU] Logika Pencarian ---
+        $query = User::where('is_admin', false);
+
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('email', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $users = $query->latest()->get();
         return response()->json($users);
     }
 
@@ -27,13 +41,8 @@ class AdminController extends Controller
         return response()->json($stats);
     }
 
-    /**
-     * --- [PERUBAHAN] Memuat relasi untuk mendapatkan nama admin ---
-     * Mengambil detail progres pendaftaran satu user.
-     */
     public function getUserDetails(User $user)
     {
-        // Memuat relasi untuk mendapatkan objek admin yang terkait
         $user->load('paymentConfirmedByAdmin', 'dafulConfirmedByAdmin');
         return response()->json($user);
     }
@@ -51,9 +60,6 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * --- [PERUBAHAN] Menyimpan ID admin dan timestamp saat konfirmasi ---
-     */
     public function confirmPayment(User $user)
     {
         try {
@@ -64,7 +70,6 @@ class AdminController extends Controller
             $user->administrasi_completed = true;
             $user->tes_seleksi_status = 'Belum Mengikuti Tes';
             
-            // Simpan data konfirmasi
             $user->payment_confirmed_by = Auth::id();
             $user->payment_confirmed_at = now();
 
@@ -75,9 +80,6 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * --- [PERUBAHAN] Menyimpan ID admin dan timestamp saat konfirmasi ---
-     */
     public function confirmReRegistration(User $user)
     {
         try {
@@ -85,7 +87,6 @@ class AdminController extends Controller
             $user->pembayaran_daful_completed = true;
             $user->pembayaran_daful_status = 'Pembayaran Sudah Dikonfirmasi';
 
-            // Simpan data konfirmasi
             $user->daful_confirmed_by = Auth::id();
             $user->daful_confirmed_at = now();
 
