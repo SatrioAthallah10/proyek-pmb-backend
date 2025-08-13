@@ -25,29 +25,32 @@ class AdminController extends Controller
             });
         }
 
-        $users = $query->latest()->get();
+        // Menggunakan 'id' untuk pengurutan karena 'created_at' tidak ada
+        $users = $query->orderBy('id', 'desc')->get();
         return response()->json($users);
     }
 
     /**
-     * [FUNGSI BARU] Mengambil semua data mahasiswa aktif (daftar ulang selesai).
+     * Mengambil semua data mahasiswa aktif (daftar ulang selesai).
      */
     public function getActiveStudents(Request $request)
     {
         $query = User::where('is_admin', false)
-                     ->where('daftar_ulang', true); // Filter hanya yang sudah daftar ulang
+                     ->where('daftar_ulang', true);
 
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
-                // --- [PERBAIKAN] Hapus pencarian berdasarkan 'npm' dari 'where clause' ---
                 $q->where('name', 'like', "%{$searchTerm}%");
             });
         }
         
-        $users = $query->orderBy('created_at', 'desc')->get([
+        // --- [PERUBAHAN DIMULAI DI SINI] ---
+        // Menghapus 'npm' dari daftar kolom karena tidak ada di tabel users
+        $users = $query->orderBy('id', 'desc')->get([
             'id', 'name', 'email', 'jalur_pendaftaran'
         ]);
+        // --- [PERUBAHAN SELESAI DI SINI] ---
 
         return response()->json($users);
     }
@@ -72,50 +75,51 @@ class AdminController extends Controller
     public function confirmInitialRegistration(User $user)
     {
         try {
-            $user->pendaftaran_awal = true;
-            $user->formulir_pendaftaran_completed = true;
-            $user->formulir_pendaftaran_status = 'Sudah Mengisi Formulir';
-            $user->save();
+            // Menggunakan metode update() untuk pembaruan yang lebih andal
+            $user->update([
+                'pendaftaran_awal' => true,
+                'formulir_pendaftaran_completed' => true,
+                'formulir_pendaftaran_status' => 'Sudah Mengisi Formulir',
+            ]);
             return response()->json(['message' => 'Initial registration confirmed for ' . $user->name]);
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            // Mengembalikan pesan error yang lebih spesifik untuk debugging
+            return response()->json(['message' => 'Konfirmasi Pendaftaran Awal Gagal: ' . $e->getMessage()], 500);
         }
     }
 
     public function confirmPayment(User $user)
     {
         try {
-            $user->pembayaran = true;
-            $user->pembayaran_form_completed = true;
-            $user->pembayaran_form_status = 'Pembayaran Sudah Dikonfirmasi';
-            $user->administrasi_status = 'Sudah Lolos Administrasi';
-            $user->administrasi_completed = true;
-            $user->tes_seleksi_status = 'Belum Mengikuti Tes';
-            
-            $user->payment_confirmed_by = Auth::id();
-            $user->payment_confirmed_at = now();
-
-            $user->save();
+            $user->update([
+                'pembayaran' => true,
+                'pembayaran_form_completed' => true,
+                'pembayaran_form_status' => 'Pembayaran Sudah Dikonfirmasi',
+                'administrasi_status' => 'Sudah Lolos Administrasi',
+                'administrasi_completed' => true,
+                'tes_seleksi_status' => 'Belum Mengikuti Tes',
+                'payment_confirmed_by' => Auth::id(),
+                'payment_confirmed_at' => now(),
+            ]);
             return response()->json(['message' => 'Payment confirmed for ' . $user->name]);
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Konfirmasi Pembayaran Gagal: ' . $e->getMessage()], 500);
         }
     }
 
     public function confirmReRegistration(User $user)
     {
         try {
-            $user->daftar_ulang = true;
-            $user->pembayaran_daful_completed = true;
-            $user->pembayaran_daful_status = 'Pembayaran Sudah Dikonfirmasi';
-
-            $user->daful_confirmed_by = Auth::id();
-            $user->daful_confirmed_at = now();
-
-            $user->save();
+            $user->update([
+                'daftar_ulang' => true,
+                'pembayaran_daful_completed' => true,
+                'pembayaran_daful_status' => 'Pembayaran Sudah Dikonfirmasi',
+                'daful_confirmed_by' => Auth::id(),
+                'daful_confirmed_at' => now(),
+            ]);
             return response()->json(['message' => 'Re-registration confirmed for ' . $user->name]);
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Konfirmasi Daftar Ulang Gagal: ' . $e->getMessage()], 500);
         }
     }
 }

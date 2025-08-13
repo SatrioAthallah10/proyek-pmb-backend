@@ -12,6 +12,15 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
 
+    // --- [PERUBAHAN DIMULAI DI SINI] ---
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+    // --- [PERUBAHAN SELESAI DI SINI] ---
+
     /**
      * The attributes that are mass assignable.
      *
@@ -23,11 +32,9 @@ class User extends Authenticatable
         'password',
         'jalur_pendaftaran',
         'is_admin',
-        // Kolom status
         'pendaftaran_awal',
         'pembayaran',
         'daftar_ulang',
-        // Kolom detail pendaftaran
         'nama_lengkap', 'no_ktp', 'no_ponsel', 'alamat', 'tempat_lahir', 'tanggal_lahir',
         'asal_sekolah', 'nama_sekolah', 'jurusan', 'status_sekolah', 'alamat_sekolah',
         'kota_sekolah', 'nilai_rata_rata', 'prodi_pilihan', 'jadwal_kuliah', 'tahun_ajaran',
@@ -37,12 +44,10 @@ class User extends Authenticatable
         'nomor_brosur',
         'nama_pemberi_rekomendasi',
         'nomor_wa_rekomendasi',
-        // Kolom status timeline
         'formulir_pendaftaran_status', 'pembayaran_form_status', 'administrasi_status',
         'tes_seleksi_status', 'pembayaran_daful_status', 'pengisian_data_diri_status', 'npm_status',
         'formulir_pendaftaran_completed', 'pembayaran_form_completed', 'administrasi_completed',
         'tes_seleksi_completed', 'pembayaran_daful_completed', 'pengisian_data_diri_completed',
-        // --- [PERUBAHAN] Tambahkan kolom baru di sini ---
         'payment_uploaded_at',
         'payment_confirmed_by',
         'payment_confirmed_at',
@@ -82,7 +87,6 @@ class User extends Authenticatable
             'tes_seleksi_completed' => 'boolean',
             'pembayaran_daful_completed' => 'boolean',
             'pengisian_data_diri_completed' => 'boolean',
-            // --- [PERUBAHAN] Tambahkan casting untuk timestamp ---
             'payment_uploaded_at' => 'datetime',
             'payment_confirmed_at' => 'datetime',
             'daful_uploaded_at' => 'datetime',
@@ -91,7 +95,7 @@ class User extends Authenticatable
     }
 
     /**
-     * --- [PERUBAHAN] Relasi untuk mengambil data admin yang mengonfirmasi ---
+     * Relasi untuk mengambil data admin yang mengonfirmasi
      */
     public function paymentConfirmedByAdmin()
     {
