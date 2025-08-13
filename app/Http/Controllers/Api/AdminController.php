@@ -45,12 +45,10 @@ class AdminController extends Controller
             });
         }
         
-        // --- [PERUBAHAN DIMULAI DI SINI] ---
         // Menghapus 'npm' dari daftar kolom karena tidak ada di tabel users
         $users = $query->orderBy('id', 'desc')->get([
             'id', 'name', 'email', 'jalur_pendaftaran'
         ]);
-        // --- [PERUBAHAN SELESAI DI SINI] ---
 
         return response()->json($users);
     }
@@ -119,7 +117,11 @@ class AdminController extends Controller
             ]);
             return response()->json(['message' => 'Re-registration confirmed for ' . $user->name]);
         } catch (Throwable $e) {
+            // --- [PERUBAHAN DIMULAI DI SINI] ---
+            // Memperbaiki typo dari 'message's' menjadi 'message'
             return response()->json(['message' => 'Konfirmasi Daftar Ulang Gagal: ' . $e->getMessage()], 500);
+            // --- [PERUBAHAN SELESAI DI SINI] ---
         }
     }
 }
+// --- [PERUBAHAN]: Menghapus kurung kurawal ekstra yang menyebabkan syntax error ---
