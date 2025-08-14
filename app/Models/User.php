@@ -12,14 +12,12 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
 
-    // --- [PERUBAHAN DIMULAI DI SINI] ---
     /**
      * Indicates if the model should be timestamped.
      *
      * @var bool
      */
     public $timestamps = false;
-    // --- [PERUBAHAN SELESAI DI SINI] ---
 
     /**
      * The attributes that are mass assignable.
@@ -37,7 +35,11 @@ class User extends Authenticatable
         'daftar_ulang',
         'nama_lengkap', 'no_ktp', 'no_ponsel', 'alamat', 'tempat_lahir', 'tanggal_lahir',
         'asal_sekolah', 'nama_sekolah', 'jurusan', 'status_sekolah', 'alamat_sekolah',
-        'kota_sekolah', 'nilai_rata_rata', 'prodi_pilihan', 'jadwal_kuliah', 'tahun_ajaran',
+        'kota_sekolah', 'nilai_rata_rata', 'prodi_pilihan',
+        // --- [PERUBAHAN DIMULAI DI SINI] ---
+        'kelas', // Menambahkan 'kelas' agar bisa diisi
+        // --- [PERUBAHAN SELESAI DI SINI] ---
+        'jadwal_kuliah', 'tahun_ajaran',
         'bukti_pembayaran_path',
         'jenis_kelamin',
         'sumber_pendaftaran',

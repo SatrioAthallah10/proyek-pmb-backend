@@ -13,11 +13,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Baris yang membuat 'Test User' sudah dihapus.
+        
+        // --- [PERUBAHAN DIMULAI DI SINI] ---
+        // Memanggil seeder admin agar akun admin dibuat.
+        $this->call([
+            AdminUserSeeder::class,
         ]);
+        // --- [PERUBAHAN SELESAI DI SINI] ---
     }
 }

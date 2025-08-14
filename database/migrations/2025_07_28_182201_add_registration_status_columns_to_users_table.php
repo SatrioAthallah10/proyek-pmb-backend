@@ -58,6 +58,11 @@ return new class extends Migration
             $table->decimal('nominal_transfer', 15, 2)->nullable();
             $table->date('tanggal_transfer')->nullable();
 
+            // Menambahkan kolom-kolom yang hilang untuk konfirmasi pembayaran
+            $table->timestamp('payment_uploaded_at')->nullable();
+            $table->foreignId('payment_confirmed_by')->nullable()->constrained('users');
+            $table->timestamp('payment_confirmed_at')->nullable();
+
             $table->string('nisn')->nullable();
             $table->string('kewarganegaraan')->nullable();
             $table->string('no_telp_rumah')->nullable();
@@ -101,6 +106,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            // --- [PERUBAHAN DIMULAI DI SINI] ---
+            // Hapus foreign key terlebih dahulu untuk menghindari error saat rollback.
+            $table->dropForeign(['payment_confirmed_by']);
+            // --- [PERUBAHAN SELESAI DI SINI] ---
+
             $table->dropColumn([
                 'formulir_pendaftaran_status',
                 'formulir_pendaftaran_completed',
@@ -119,7 +129,9 @@ return new class extends Migration
                 'asal_sekolah', 'nama_sekolah', 'jurusan', 'status_sekolah',
                 'alamat_sekolah', 'kota_sekolah', 'nilai_rata_rata', 'prodi_pilihan',
                 'jadwal_kuliah', 'tahun_ajaran', 'bukti_pembayaran_path', 'keterangan_pembayaran', 'nama_pengirim_transfer',
-                'nominal_transfer', 'tanggal_transfer', 'nisn', 'kewarganegaraan', 'no_telp_rumah', 'dusun', 'rt', 'rw',
+                'nominal_transfer', 'tanggal_transfer',
+                'payment_uploaded_at', 'payment_confirmed_by', 'payment_confirmed_at',
+                'nisn', 'kewarganegaraan', 'no_telp_rumah', 'dusun', 'rt', 'rw',
                 'kelurahan', 'kode_pos', 'kecamatan', 'kota', 'provinsi', 'agama',
                 'jenis_tinggal', 'alat_transportasi',
                 'nama_ayah', 'nik_ayah', 'tanggal_lahir_ayah', 'pendidikan_ayah',

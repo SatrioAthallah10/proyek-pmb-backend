@@ -20,11 +20,7 @@ class PendaftaranController extends Controller
         $user->no_ktp = $request->input('no_ktp');
         $user->no_ponsel = $request->input('no_ponsel');
         $user->alamat = $request->input('alamat');
-
-        // --- PERBAIKAN DI SINI ---
-        // Memastikan 'tempat_lahir' diambil dari request dan disimpan
         $user->tempat_lahir = $request->input('tempat_lahir');
-        
         $user->tanggal_lahir = $request->input('tanggal_lahir');
         $user->asal_sekolah = $request->input('asal_sekolah');
         $user->nama_sekolah = $request->input('nama_sekolah');
@@ -34,6 +30,12 @@ class PendaftaranController extends Controller
         $user->kota_sekolah = $request->input('kota_sekolah');
         $user->nilai_rata_rata = $request->input('nilai_rata_rata');
         $user->prodi_pilihan = $request->input('prodi_pilihan');
+        
+        // --- [PERUBAHAN DIMULAI DI SINI] ---
+        // Menambahkan pemetaan untuk 'kelas' dari request ke database
+        $user->kelas = $request->input('kelas');
+        // --- [PERUBAHAN SELESAI DI SINI] ---
+
         $user->jadwal_kuliah = $request->input('jadwal_kuliah');
         $user->tahun_ajaran = $request->input('tahun_ajaran');
 
@@ -60,6 +62,7 @@ class PendaftaranController extends Controller
 
         $user->bukti_pembayaran_path = $path;
         $user->pembayaran_form_status = 'Menunggu Konfirmasi';
+        $user->payment_uploaded_at = now(); // Menambahkan waktu upload
         $user->save();
 
         return response()->json(['message' => 'Konfirmasi pembayaran berhasil dikirim.']);
@@ -89,6 +92,7 @@ class PendaftaranController extends Controller
         
         $user->bukti_daful_path = $path;
         $user->pembayaran_daful_status = 'Menunggu Konfirmasi';
+        $user->daful_uploaded_at = now(); // Menambahkan waktu upload
         $user->save();
 
         return response()->json(['message' => 'Konfirmasi daftar ulang berhasil dikirim.']);
@@ -112,11 +116,12 @@ class PendaftaranController extends Controller
         $user->pembayaran_daful_completed = true;
         
         $tahun = substr(date('Y'), -2);
-        $kodeProdi = '07';
+        $kodeProdi = '07'; // Sebaiknya kode prodi ini dinamis
         $nomorUrut = str_pad($user->id, 4, '0', STR_PAD_LEFT);
         $npm = "06.20{$tahun}.1.{$kodeProdi}{$nomorUrut}";
 
         $user->npm_status = $npm;
+        $user->npm = $npm; // Menyimpan NPM juga di kolomnya sendiri
         $user->npm_completed = true;
         $user->save();
 
