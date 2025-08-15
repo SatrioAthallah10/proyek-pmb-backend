@@ -32,28 +32,27 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-// --- [PERBAIKAN FINAL PADA RUTE ADMIN] ---
-
+// Rute Admin
 Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 
     // Grup Rute untuk Owner dan Kepala Bagian
-    // [PERBAIKAN] Menyesuaikan 'kepala' menjadi 'kepala_bagian'
     Route::middleware('role:owner,kepala_bagian')->group(function () {
         Route::get('/stats', [AdminController::class, 'getStats']);
     });
 
     // Grup Rute untuk Staff dan Kepala Bagian
-    // [PERBAIKAN] Menyesuaikan 'kepala' menjadi 'kepala_bagian'
     Route::middleware('role:staff,kepala_bagian')->group(function () {
         Route::get('/users', [AdminController::class, 'index']);
         Route::put('/users/{user}/confirm-payment', [AdminController::class, 'confirmPayment']);
     });
 
     // Grup Rute khusus untuk Kepala Bagian
-    // [PERBAIKAN] Menyesuaikan 'kepala' menjadi 'kepala_bagian'
     Route::middleware('role:kepala_bagian')->group(function () {
         Route::get('/users/{user}', [AdminController::class, 'getUserDetails']);
         Route::put('/users/{user}/confirm-initial-registration', [AdminController::class, 'confirmInitialRegistration']);
         Route::put('/users/{user}/confirm-reregistration', [AdminController::class, 'confirmReRegistration']);
+        
+        // --- [PERBAIKAN] Menambahkan rute yang hilang untuk Mahasiswa Aktif ---
+        Route::get('/active-students', [AdminController::class, 'getActiveStudents']);
     });
 });

@@ -12,8 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // PERBAIKAN: Mendaftarkan HandleCors sebagai middleware global
-        // Ini akan memastikan header CORS ditambahkan ke SETIAP respons dari server.
+        // --- [PERBAIKAN FINAL] ---
+        // Mendaftarkan alias 'role' di sini adalah cara yang benar untuk Laravel versi baru.
+        // File Kernel.php sekarang diabaikan untuk pendaftaran alias middleware.
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRole::class,
+        ]);
+
+        // Mendaftarkan HandleCors sebagai middleware global (sudah benar)
         $middleware->use([
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);

@@ -15,8 +15,6 @@ class AdminController extends Controller
      */
     public function index(Request $request)
     {
-        // [PERBAIKAN] Mengganti pengecekan 'is_admin' menjadi 'role'.
-        // Logika ini sekarang mengambil semua pengguna yang BUKAN admin (pendaftar).
         $query = User::whereNull('role');
 
         if ($request->has('search') && $request->search != '') {
@@ -36,8 +34,6 @@ class AdminController extends Controller
      */
     public function getStats()
     {
-        // [PERBAIKAN] Mengganti pengecekan 'is_admin' menjadi 'role'
-        // untuk memastikan statistik hanya menghitung data pendaftar.
         $stats = [
             'total_pendaftar' => User::whereNull('role')->count(),
             'pendaftaran_awal_selesai' => User::whereNull('role')->where('pendaftaran_awal', true)->count(),
@@ -52,14 +48,35 @@ class AdminController extends Controller
      */
     public function getUserDetails(User $user)
     {
-        // Fungsi ini sudah benar dan tidak memerlukan perubahan.
         $user->load('paymentConfirmedByAdmin', 'dafulConfirmedByAdmin');
         return response()->json($user);
     }
 
+    // --- [FUNGSI BARU UNTUK MAHASISWA AKTIF] ---
+    /**
+     * Mengambil data mahasiswa yang sudah menyelesaikan daftar ulang.
+     */
+    public function getActiveStudents(Request $request)
+    {
+        // Memulai query untuk user yang sudah daftar ulang dan bukan admin
+        $query = User::where('daftar_ulang', true)->whereNull('role');
+
+        // Menambahkan fungsionalitas pencarian berdasarkan nama atau NPM
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('npm', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $activeStudents = $query->orderBy('name', 'asc')->get();
+        return response()->json($activeStudents);
+    }
+    // --- [AKHIR DARI FUNGSI BARU] ---
+
     /**
      * Mengonfirmasi pendaftaran awal seorang user.
-     * Catatan: Fungsi ini ditambahkan untuk kelengkapan, mungkin belum ada di file asli Anda.
      */
     public function confirmInitialRegistration(User $user)
     {
@@ -81,8 +98,6 @@ class AdminController extends Controller
     public function confirmPayment(User $user)
     {
         try {
-            // Logika konfirmasi ini tidak diubah, hanya disempurnakan agar lebih lengkap
-            // dan sesuai dengan alur yang diharapkan di frontend.
             $user->update([
                 'pembayaran' => true,
                 'pembayaran_form_completed' => true,
@@ -105,7 +120,6 @@ class AdminController extends Controller
     public function confirmReRegistration(User $user)
     {
         try {
-            // Logika konfirmasi ini juga tidak diubah, hanya disempurnakan.
             $user->update([
                 'daftar_ulang' => true,
                 'pembayaran_daful_completed' => true,
