@@ -29,16 +29,15 @@ class User extends Authenticatable
         'email',
         'password',
         'jalur_pendaftaran',
-        'is_admin',
+        // --- [PERBAIKAN] Menghapus 'is_admin' yang sudah tidak digunakan ---
+        'role', // Menambahkan 'role' agar bisa diisi saat pendaftaran/seeding
         'pendaftaran_awal',
         'pembayaran',
         'daftar_ulang',
         'nama_lengkap', 'no_ktp', 'no_ponsel', 'alamat', 'tempat_lahir', 'tanggal_lahir',
         'asal_sekolah', 'nama_sekolah', 'jurusan', 'status_sekolah', 'alamat_sekolah',
         'kota_sekolah', 'nilai_rata_rata', 'prodi_pilihan',
-        // --- [PERUBAHAN DIMULAI DI SINI] ---
-        'kelas', // Menambahkan 'kelas' agar bisa diisi
-        // --- [PERUBAHAN SELESAI DI SINI] ---
+        'kelas',
         'jadwal_kuliah', 'tahun_ajaran',
         'bukti_pembayaran_path',
         'jenis_kelamin',
@@ -79,7 +78,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_admin' => 'boolean',
+            // --- [PERBAIKAN] Menghapus 'is_admin' yang sudah tidak digunakan ---
             'pendaftaran_awal' => 'boolean',
             'pembayaran' => 'boolean',
             'daftar_ulang' => 'boolean',
