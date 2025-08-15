@@ -14,11 +14,24 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             // General flags and roles
             $table->string('jalur_pendaftaran')->default('reguler')->after('email');
-            $table->boolean('is_admin')->default(false)->after('password');
+
+            // --- [PERUBAHAN DIMULAI DI SINI] ---
+            // Mengganti is_admin dengan kolom 'role' untuk menyimpan peran yang berbeda.
+            // 'kepala_bagian' = Admin(Kepala Bagian)
+            // 'staff' = Admin(Staff)
+            // 'owner' = Admin(Owner)
+            // User biasa akan memiliki nilai NULL pada kolom ini.
+            $table->enum('role', ['kepala_bagian', 'staff', 'owner'])->nullable()->after('password');
+            // Menghapus kolom is_admin yang lama
+            // $table->boolean('is_admin')->default(false)->after('password'); 
+            // --- [PERUBAHAN SELESAI DI SINI] ---
+
             $table->boolean('pendaftaran_awal')->default(false)->after('name');
             $table->boolean('pembayaran')->default(false)->after('pendaftaran_awal');
             $table->boolean('daftar_ulang')->default(false)->after('pembayaran');
 
+            // ... sisa file tetap sama ...
+            
             // Registration step statuses
             $table->string('formulir_pendaftaran_status')->default('Belum Mengisi Formulir');
             $table->boolean('formulir_pendaftaran_completed')->default(false);
@@ -122,10 +135,16 @@ return new class extends Migration
             // Drop foreign keys first
             $table->dropForeign(['payment_confirmed_by']);
             $table->dropForeign(['daful_confirmed_by']);
+            
+            // --- [PERUBAHAN DIMULAI DI SINI] ---
+            // Hapus kolom 'role' dan kembalikan 'is_admin' jika migrasi di-rollback
+            $table->dropColumn('role');
+            // $table->boolean('is_admin')->default(false)->after('password');
+            // --- [PERUBAHAN SELESAI DI SINI] ---
 
             // Drop all added columns
             $table->dropColumn([
-                'jalur_pendaftaran', 'is_admin', 'pendaftaran_awal', 'pembayaran', 'daftar_ulang',
+                'jalur_pendaftaran', 'pendaftaran_awal', 'pembayaran', 'daftar_ulang', // is_admin dihapus dari sini
                 'formulir_pendaftaran_status', 'formulir_pendaftaran_completed', 'pembayaran_form_status',
                 'pembayaran_form_completed', 'administrasi_status', 'administrasi_completed',
                 'tes_seleksi_status', 'tes_seleksi_completed', 'pembayaran_daful_status',

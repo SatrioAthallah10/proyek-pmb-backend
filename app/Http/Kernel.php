@@ -14,7 +14,7 @@ class Kernel extends HttpKernel
      * @var array<int, class-string|string>
      */
     protected $middleware = [
-        // \App\Http\Middleware\TrustHosts::class,
+        // ... (Tidak ada perubahan di sini)
         \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
@@ -30,6 +30,7 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
+            // ... (Tidak ada perubahan di sini)
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
@@ -39,7 +40,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            // ... (Tidak ada perubahan di sini)
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
@@ -61,6 +62,14 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'is.kepala.bagian' => \App\Http\Middleware\IsAdmin::class, // <-- [PERUBAHAN]
+
+        // --- [PERUBAHAN DIMULAI DI SINI] ---
+        // Menghapus alias 'is.admin' yang lama
+        // 'is.admin' => \App\Http\Middleware\IsAdmin::class,
+
+        // Menambahkan alias 'role' yang baru dan menunjuk ke middleware CheckRole.
+        // Middleware ini akan kita buat pada langkah selanjutnya.
+        'role' => \App\Http\Middleware\CheckRole::class,
+        // --- [PERUBAHAN SELESAI DI SINI] ---
     ];
 }

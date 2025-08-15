@@ -6,8 +6,10 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PendaftaranController;
 use App\Http\Controllers\Api\AdminController;
-use App\Http\Middleware\IsAdmin;
+// Menghapus 'use' untuk IsAdmin karena sudah tidak digunakan
+// use App\Http\Middleware\IsAdmin;
 
+// --- (Rute Publik dan Rute User Biasa tidak berubah) ---
 // Rute Publik
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/register-rpl', [AuthController::class, 'registerRpl']);
@@ -32,19 +34,41 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/submit-konfirmasi-daful', [PendaftaranController::class, 'submitKonfirmasiDaful']);
 });
 
-// Grup route khusus untuk Kepala Bagian
-Route::middleware(['auth:sanctum', IsAdmin::class])->prefix('kepala-bagian')->group(function () {
-    Route::get('/users', [AdminController::class, 'index']);
-    Route::get('/stats', [AdminController::class, 'getStats']);
 
-    // --- RUTE BARU UNTUK MAHASISWA AKTIF ---
-    Route::get('/active-students', [AdminController::class, 'getActiveStudents']);
+// --- [PERUBAHAN DIMULAI DI SINI] ---
 
-    // Rute detail user untuk pop-up
-    Route::get('/users/{user}', [AdminController::class, 'getUserDetails']);
+// Mengganti grup rute admin yang lama dengan struktur berbasis peran yang baru.
+Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 
-    // Rute konfirmasi
-    Route::put('/users/{user}/confirm-initial-registration', [AdminController::class, 'confirmInitialRegistration']);
-    Route::put('/users/{user}/confirm-payment', [AdminController::class, 'confirmPayment']);
-    Route::put('/users/{user}/confirm-reregistration', [AdminController::class, 'confirmReRegistration']);
+    // Grup Rute untuk Admin (Owner)
+    // Hanya bisa diakses oleh 'owner' dan 'kepala_bagian'
+    Route::middleware('role:owner,kepala_bagian')->group(function () {
+        Route::get('/stats', [AdminController::class, 'getStats']); // Endpoint untuk melihat statistik pendaftar
+    });
+
+    // Grup Rute untuk Admin (Staff)
+    // Bisa diakses oleh 'staff' dan 'kepala_bagian'
+    Route::middleware('role:staff,kepala_bagian')->group(function () {
+        // Endpoint untuk melihat semua user (dibutuhkan untuk halaman konfirmasi)
+        Route::get('/users-for-confirmation', [AdminController::class, 'getUsersForConfirmation']); 
+        // Endpoint untuk konfirmasi pembayaran
+        Route::put('/users/{user}/confirm-payment', [AdminController::class, 'confirmPayment']);
+    });
+
+    // Grup Rute untuk Admin (Kepala Bagian)
+    // HANYA bisa diakses oleh 'kepala_bagian'
+    Route::middleware('role:kepala_bagian')->group(function () {
+        Route::get('/users', [AdminController::class, 'index']); // Melihat semua data user
+        Route::get('/active-students', [AdminController::class, 'getActiveStudents']); // Melihat mahasiswa aktif
+        Route::get('/users/{user}', [AdminController::class, 'getUserDetails']); // Melihat detail user
+        
+        // Rute konfirmasi lainnya
+        Route::put('/users/{user}/confirm-initial-registration', [AdminController::class, 'confirmInitialRegistration']);
+        Route::put('/users/{user}/confirm-reregistration', [AdminController::class, 'confirmReRegistration']);
+        
+        // Rute untuk mengelola admin (jika diperlukan di masa depan)
+        // Route::apiResource('roles', RoleController::class);
+    });
 });
+
+// --- [PERUBAHAN SELESAI DI SINI] ---

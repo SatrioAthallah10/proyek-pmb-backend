@@ -13,11 +13,32 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
+        // --- [PERUBAHAN DIMULAI DI SINI] ---
+
+        // 1. Membuat Admin Kepala Bagian (role paling tinggi)
         User::create([
-            'name' => 'Admin(Kepala Bagian)',
-            'email' => 'admin@email.com',
-            'password' => Hash::make('password123'), // Ganti 'password' dengan password yang Anda inginkan
-            'is_admin' => true,
+            'name' => 'Admin (Kepala Bagian)',
+            'email' => 'kepala@pmb.com',
+            'password' => Hash::make('password123'),
+            'role' => 'kepala_bagian', // Menggunakan kolom 'role' yang baru
         ]);
+
+        // 2. Membuat Admin Staff (hanya untuk konfirmasi pembayaran)
+        User::create([
+            'name' => 'Admin (Staff)',
+            'email' => 'staff@pmb.com',
+            'password' => Hash::make('password123'),
+            'role' => 'staff', // Menggunakan kolom 'role' yang baru
+        ]);
+
+        // 3. Membuat Admin Owner (hanya untuk melihat jumlah pendaftar)
+        User::create([
+            'name' => 'Admin (Owner)',
+            'email' => 'owner@pmb.com',
+            'password' => Hash::make('password123'),
+            'role' => 'owner', // Menggunakan kolom 'role' yang baru
+        ]);
+
+        // --- [PERUBAHAN SELESAI DI SINI] ---
     }
 }
