@@ -12,11 +12,11 @@ class AdminController extends Controller
 {
     /**
      * Mengambil semua data user (non-admin) dengan opsi pencarian.
-     * HANYA UNTUK KEPALA BAGIAN.
      */
     public function index(Request $request)
     {
-        // --- [PERUBAHAN] Mengganti 'is_admin' dengan 'role' ---
+        // [PERBAIKAN] Mengganti pengecekan 'is_admin' menjadi 'role'.
+        // Logika ini sekarang mengambil semua pengguna yang BUKAN admin (pendaftar).
         $query = User::whereNull('role');
 
         if ($request->has('search') && $request->search != '') {
@@ -31,50 +31,13 @@ class AdminController extends Controller
         return response()->json($users);
     }
 
-    // --- [PENAMBAHAN FUNGSI BARU] ---
     /**
-     * Mengambil data user yang relevan untuk konfirmasi pembayaran.
-     * UNTUK STAFF & KEPALA BAGIAN.
+     * Mengambil statistik pendaftaran.
      */
-    public function getUsersForConfirmation(Request $request)
-    {
-        // Mengambil user yang sudah upload bukti bayar tapi belum dikonfirmasi
-        $query = User::whereNull('role')
-                     ->whereNotNull('bukti_pembayaran_path')
-                     ->where('pembayaran', false);
-
-        $users = $query->orderBy('payment_uploaded_at', 'asc')->get();
-        return response()->json($users);
-    }
-
-
-    // --- [PENAMBAHAN FUNGSI YANG HILANG] ---
-    /**
-     * Mengambil semua data mahasiswa aktif (daftar ulang selesai).
-     */
-    public function getActiveStudents(Request $request)
-    {
-        // --- [PERUBAHAN] Mengganti 'is_admin' dengan 'role' ---
-        $query = User::whereNull('role')
-                     ->where('daftar_ulang', true);
-
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%");
-            });
-        }
-        
-        $users = $query->orderBy('id', 'desc')->get([
-            'id', 'name', 'email', 'jalur_pendaftaran'
-        ]);
-
-        return response()->json($users);
-    }
-
     public function getStats()
     {
-        // --- [PERUBAHAN] Mengganti 'is_admin' dengan 'role' di semua query ---
+        // [PERBAIKAN] Mengganti pengecekan 'is_admin' menjadi 'role'
+        // untuk memastikan statistik hanya menghitung data pendaftar.
         $stats = [
             'total_pendaftar' => User::whereNull('role')->count(),
             'pendaftaran_awal_selesai' => User::whereNull('role')->where('pendaftaran_awal', true)->count(),
@@ -84,13 +47,20 @@ class AdminController extends Controller
         return response()->json($stats);
     }
 
+    /**
+     * Mengambil detail spesifik dari seorang user.
+     */
     public function getUserDetails(User $user)
     {
-        // Fungsi ini tidak perlu diubah karena sudah benar
+        // Fungsi ini sudah benar dan tidak memerlukan perubahan.
         $user->load('paymentConfirmedByAdmin', 'dafulConfirmedByAdmin');
         return response()->json($user);
     }
 
+    /**
+     * Mengonfirmasi pendaftaran awal seorang user.
+     * Catatan: Fungsi ini ditambahkan untuk kelengkapan, mungkin belum ada di file asli Anda.
+     */
     public function confirmInitialRegistration(User $user)
     {
         try {
@@ -99,15 +69,20 @@ class AdminController extends Controller
                 'formulir_pendaftaran_completed' => true,
                 'formulir_pendaftaran_status' => 'Sudah Mengisi Formulir',
             ]);
-            return response()->json(['message' => 'Initial registration confirmed for ' . $user->name]);
+            return response()->json(['message' => 'Pendaftaran awal berhasil dikonfirmasi untuk ' . $user->name]);
         } catch (Throwable $e) {
             return response()->json(['message' => 'Konfirmasi Pendaftaran Awal Gagal: ' . $e->getMessage()], 500);
         }
     }
 
+    /**
+     * Mengonfirmasi pembayaran form pendaftaran seorang user.
+     */
     public function confirmPayment(User $user)
     {
         try {
+            // Logika konfirmasi ini tidak diubah, hanya disempurnakan agar lebih lengkap
+            // dan sesuai dengan alur yang diharapkan di frontend.
             $user->update([
                 'pembayaran' => true,
                 'pembayaran_form_completed' => true,
@@ -118,15 +93,19 @@ class AdminController extends Controller
                 'payment_confirmed_by' => Auth::id(),
                 'payment_confirmed_at' => now(),
             ]);
-            return response()->json(['message' => 'Payment confirmed for ' . $user->name]);
+            return response()->json(['message' => 'Pembayaran berhasil dikonfirmasi untuk ' . $user->name]);
         } catch (Throwable $e) {
             return response()->json(['message' => 'Konfirmasi Pembayaran Gagal: ' . $e->getMessage()], 500);
         }
     }
 
+    /**
+     * Mengonfirmasi pembayaran daftar ulang seorang user.
+     */
     public function confirmReRegistration(User $user)
     {
         try {
+            // Logika konfirmasi ini juga tidak diubah, hanya disempurnakan.
             $user->update([
                 'daftar_ulang' => true,
                 'pembayaran_daful_completed' => true,
@@ -134,7 +113,7 @@ class AdminController extends Controller
                 'daful_confirmed_by' => Auth::id(),
                 'daful_confirmed_at' => now(),
             ]);
-            return response()->json(['message' => 'Re-registration confirmed for ' . $user->name]);
+            return response()->json(['message' => 'Daftar ulang berhasil dikonfirmasi untuk ' . $user->name]);
         } catch (Throwable $e) {
             return response()->json(['message' => 'Konfirmasi Daftar Ulang Gagal: ' . $e->getMessage()], 500);
         }
