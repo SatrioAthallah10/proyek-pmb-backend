@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class AdminController extends Controller
@@ -52,28 +53,48 @@ class AdminController extends Controller
         return response()->json($user);
     }
 
-    // --- [FUNGSI BARU UNTUK MAHASISWA AKTIF] ---
     /**
      * Mengambil data mahasiswa yang sudah menyelesaikan daftar ulang.
      */
     public function getActiveStudents(Request $request)
     {
-        // Memulai query untuk user yang sudah daftar ulang dan bukan admin
         $query = User::where('daftar_ulang', true)->whereNull('role');
 
-        // Menambahkan fungsionalitas pencarian berdasarkan nama atau NPM
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('npm', 'like', "%{$searchTerm}%");
+                $q->where('name', 'like', "%{$searchTerm}%");
             });
         }
 
         $activeStudents = $query->orderBy('name', 'asc')->get();
         return response()->json($activeStudents);
     }
+
+    // --- [PENAMBAHAN] Fungsi baru untuk update data mahasiswa aktif ---
+    /**
+     * Memperbarui detail (kelas dan prodi) dari mahasiswa aktif.
+     */
+    public function updateActiveStudentDetails(Request $request, User $user)
+    {
+        // Validasi input
+        $validatedData = $request->validate([
+            'jadwal_kuliah' => ['required', Rule::in(['Pagi', 'Malam'])],
+            'prodi_pilihan' => ['required', 'string', 'max:255'],
+        ]);
+
+        try {
+            $user->update([
+                'jadwal_kuliah' => $validatedData['jadwal_kuliah'],
+                'prodi_pilihan' => $validatedData['prodi_pilihan'],
+            ]);
+            return response()->json(['message' => 'Data mahasiswa berhasil diperbarui.', 'user' => $user]);
+        } catch (Throwable $e) {
+            return response()->json(['message' => 'Gagal memperbarui data mahasiswa: ' . $e->getMessage()], 500);
+        }
+    }
     // --- [AKHIR DARI FUNGSI BARU] ---
+
 
     /**
      * Mengonfirmasi pendaftaran awal seorang user.

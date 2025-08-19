@@ -51,8 +51,9 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
         Route::get('/users/{user}', [AdminController::class, 'getUserDetails']);
         Route::put('/users/{user}/confirm-initial-registration', [AdminController::class, 'confirmInitialRegistration']);
         Route::put('/users/{user}/confirm-reregistration', [AdminController::class, 'confirmReRegistration']);
-        
-        // --- [PERBAIKAN] Menambahkan rute yang hilang untuk Mahasiswa Aktif ---
         Route::get('/active-students', [AdminController::class, 'getActiveStudents']);
+
+        // --- [PENAMBAHAN] Rute baru untuk update data mahasiswa aktif ---
+        Route::put('/active-students/{user}/update-details', [AdminController::class, 'updateActiveStudentDetails']);
     });
 });
