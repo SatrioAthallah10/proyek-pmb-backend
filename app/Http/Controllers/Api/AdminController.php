@@ -6,11 +6,45 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 use Throwable;
 
 class AdminController extends Controller
 {
+    // --- [PENAMBAHAN] Fungsi baru untuk mendaftarkan admin (staff) ---
+    /**
+     * Mendaftarkan user admin baru dengan peran 'staff'.
+     * Hanya bisa diakses oleh 'kepala_bagian'.
+     */
+    public function registerStaff(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'staff', // Langsung set peran sebagai staff
+            ]);
+
+            return response()->json([
+                'message' => 'Akun staff berhasil dibuat.',
+                'user' => $user
+            ], 201);
+        } catch (Throwable $e) {
+            return response()->json(['message' => 'Gagal membuat akun staff: ' . $e->getMessage()], 500);
+        }
+    }
+    // --- [AKHIR DARI FUNGSI BARU] ---
+
+
     /**
      * Mengambil semua data user (non-admin) dengan opsi pencarian.
      */
@@ -71,7 +105,6 @@ class AdminController extends Controller
         return response()->json($activeStudents);
     }
 
-    // --- [PENAMBAHAN] Fungsi baru untuk update data mahasiswa aktif ---
     /**
      * Memperbarui detail (kelas dan prodi) dari mahasiswa aktif.
      */
@@ -93,7 +126,6 @@ class AdminController extends Controller
             return response()->json(['message' => 'Gagal memperbarui data mahasiswa: ' . $e->getMessage()], 500);
         }
     }
-    // --- [AKHIR DARI FUNGSI BARU] ---
 
 
     /**
