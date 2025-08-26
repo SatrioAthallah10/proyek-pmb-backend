@@ -7,14 +7,14 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PendaftaranController;
 use App\Http\Controllers\Api\AdminController;
 
-// Rute Publik (Tidak ada perubahan)
+// Rute Publik
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/register-rpl', [AuthController::class, 'registerRpl']);
 Route::post('/register-magister', [AuthController::class, 'registerMagister']);
 Route::post('/register-magister-rpl', [AuthController::class, 'registerMagisterRpl']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Rute Terproteksi untuk User Biasa (Tidak ada perubahan)
+// Rute Terproteksi untuk User Biasa
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -35,6 +35,9 @@ Route::middleware('auth:sanctum')->group(function () {
 // Rute Admin
 Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 
+    // --- [PENAMBAHAN] Rute untuk mengambil menu yang diizinkan ---
+    Route::get('/my-menu', [AdminController::class, 'getMyMenuPermissions']);
+
     // Grup Rute untuk Owner dan Kepala Bagian
     Route::middleware('role:owner,kepala_bagian')->group(function () {
         Route::get('/stats', [AdminController::class, 'getStats']);
@@ -53,8 +56,10 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
         Route::put('/users/{user}/confirm-reregistration', [AdminController::class, 'confirmReRegistration']);
         Route::get('/active-students', [AdminController::class, 'getActiveStudents']);
         Route::put('/active-students/{user}/update-details', [AdminController::class, 'updateActiveStudentDetails']);
-
-        // --- [PENAMBAHAN] Rute baru untuk mendaftarkan admin (staff) ---
         Route::post('/register-staff', [AdminController::class, 'registerStaff']);
+
+        // --- [PENAMBAHAN] Rute baru untuk mengelola hak akses menu ---
+        Route::get('/menu-permissions', [AdminController::class, 'getMenuPermissions']);
+        Route::put('/menu-permissions', [AdminController::class, 'updateMenuPermissions']);
     });
 });

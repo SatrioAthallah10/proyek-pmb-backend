@@ -13,32 +13,41 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // --- [PERUBAHAN DIMULAI DI SINI] ---
+        // --- [PERBAIKAN DIMULAI DI SINI] ---
 
-        // 1. Membuat Admin Kepala Bagian (role paling tinggi)
-        User::create([
-            'name' => 'Admin (Kepala Bagian)',
-            'email' => 'kepala@pmb.com',
-            'password' => Hash::make('password123'),
-            'role' => 'kepala_bagian', // Menggunakan kolom 'role' yang baru
-        ]);
+        // Menggunakan updateOrCreate untuk menghindari error duplikasi.
+        // Metode ini akan mencari user berdasarkan 'email'.
+        // Jika tidak ada, user baru akan dibuat dengan semua data yang diberikan.
+        // Jika sudah ada, datanya akan diperbarui (dalam kasus ini, tidak ada perubahan).
 
-        // 2. Membuat Admin Staff (hanya untuk konfirmasi pembayaran)
-        User::create([
-            'name' => 'Admin (Staff)',
-            'email' => 'staff@pmb.com',
-            'password' => Hash::make('password123'),
-            'role' => 'staff', // Menggunakan kolom 'role' yang baru
-        ]);
+        $admins = [
+            [
+                'name' => 'Admin (Kepala Bagian)',
+                'email' => 'kepala@pmb.com',
+                'password' => Hash::make('password123'),
+                'role' => 'kepala_bagian',
+            ],
+            [
+                'name' => 'Admin (Staff)',
+                'email' => 'staff@pmb.com',
+                'password' => Hash::make('password123'),
+                'role' => 'staff',
+            ],
+            [
+                'name' => 'Admin (Owner)',
+                'email' => 'owner@pmb.com',
+                'password' => Hash::make('password123'),
+                'role' => 'owner',
+            ],
+        ];
 
-        // 3. Membuat Admin Owner (hanya untuk melihat jumlah pendaftar)
-        User::create([
-            'name' => 'Admin (Owner)',
-            'email' => 'owner@pmb.com',
-            'password' => Hash::make('password123'),
-            'role' => 'owner', // Menggunakan kolom 'role' yang baru
-        ]);
+        foreach ($admins as $adminData) {
+            User::updateOrCreate(
+                ['email' => $adminData['email']], // Kunci untuk mencari
+                $adminData // Data untuk dibuat atau diperbarui
+            );
+        }
 
-        // --- [PERUBAHAN SELESAI DI SINI] ---
+        // --- [PERBAIKAN SELESAI DI SINI] ---
     }
 }

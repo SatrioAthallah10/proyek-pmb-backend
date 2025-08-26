@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+// --- [PENAMBAHAN] Mengimpor model MenuPermission ---
+use App\Models\MenuPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -13,11 +15,85 @@ use Throwable;
 
 class AdminController extends Controller
 {
-    // --- [PENAMBAHAN] Fungsi baru untuk mendaftarkan admin (staff) ---
+    // --- [PENAMBAHAN FITUR BARU] ---
+
     /**
-     * Mendaftarkan user admin baru dengan peran 'staff'.
+     * Mengambil semua pengaturan visibilitas menu untuk semua peran.
      * Hanya bisa diakses oleh 'kepala_bagian'.
      */
+    public function getMenuPermissions()
+    {
+        // Mengambil semua permission dan mengelompokkannya berdasarkan peran
+        $permissions = MenuPermission::all()->groupBy('role')->map(function ($items) {
+            return $items->keyBy('menu_key');
+        });
+
+        return response()->json($permissions);
+    }
+
+    /**
+     * Memperbarui pengaturan visibilitas menu.
+     * Hanya bisa diakses oleh 'kepala_bagian'.
+     */
+    public function updateMenuPermissions(Request $request)
+    {
+        $request->validate([
+            'permissions' => 'required|array',
+            'permissions.*' => 'required|array',
+            'permissions.*.*' => 'required|boolean',
+        ]);
+
+        try {
+            foreach ($request->permissions as $role => $menus) {
+                foreach ($menus as $menu_key => $is_visible) {
+                    MenuPermission::updateOrCreate(
+                        ['role' => $role, 'menu_key' => $menu_key],
+                        ['is_visible' => $is_visible]
+                    );
+                }
+            }
+            return response()->json(['message' => 'Pengaturan menu berhasil diperbarui.']);
+        } catch (Throwable $e) {
+            return response()->json(['message' => 'Gagal memperbarui pengaturan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Mengambil menu yang diizinkan untuk admin yang sedang login.
+     * Ini lebih efisien daripada mengambil semua dan memfilter di frontend.
+     */
+    public function getMyMenuPermissions()
+    {
+        $user = Auth::user();
+        $role = $user->role;
+
+        // Kepala Bagian dapat melihat semua menu
+        if ($role === 'kepala_bagian') {
+            return response()->json([
+                'dashboard' => true,
+                'konfirmasi-pembayaran' => true,
+                'manajemen-pendaftar' => true,
+                'mahasiswa-aktif' => true,
+                'tambah-staff' => true,
+                'pengaturan-menu' => true, // Menu baru
+            ]);
+        }
+
+        // Untuk peran lain, ambil dari database
+        $permissions = MenuPermission::where('role', $role)
+            ->where('is_visible', true)
+            ->pluck('menu_key')
+            ->flip() // Mengubah value menjadi key untuk pencarian O(1) di frontend
+            ->map(function () {
+                return true; // value menjadi true
+            });
+
+        return response()->json($permissions);
+    }
+
+    // --- [AKHIR DARI FITUR BARU] ---
+
+
     public function registerStaff(Request $request)
     {
         $request->validate([
@@ -31,7 +107,7 @@ class AdminController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role' => 'staff', // Langsung set peran sebagai staff
+                'role' => 'staff',
             ]);
 
             return response()->json([
@@ -42,12 +118,7 @@ class AdminController extends Controller
             return response()->json(['message' => 'Gagal membuat akun staff: ' . $e->getMessage()], 500);
         }
     }
-    // --- [AKHIR DARI FUNGSI BARU] ---
 
-
-    /**
-     * Mengambil semua data user (non-admin) dengan opsi pencarian.
-     */
     public function index(Request $request)
     {
         $query = User::whereNull('role');
@@ -64,9 +135,6 @@ class AdminController extends Controller
         return response()->json($users);
     }
 
-    /**
-     * Mengambil statistik pendaftaran.
-     */
     public function getStats()
     {
         $stats = [
@@ -78,18 +146,12 @@ class AdminController extends Controller
         return response()->json($stats);
     }
 
-    /**
-     * Mengambil detail spesifik dari seorang user.
-     */
     public function getUserDetails(User $user)
     {
         $user->load('paymentConfirmedByAdmin', 'dafulConfirmedByAdmin');
         return response()->json($user);
     }
 
-    /**
-     * Mengambil data mahasiswa yang sudah menyelesaikan daftar ulang.
-     */
     public function getActiveStudents(Request $request)
     {
         $query = User::where('daftar_ulang', true)->whereNull('role');
@@ -105,12 +167,8 @@ class AdminController extends Controller
         return response()->json($activeStudents);
     }
 
-    /**
-     * Memperbarui detail (kelas dan prodi) dari mahasiswa aktif.
-     */
     public function updateActiveStudentDetails(Request $request, User $user)
     {
-        // Validasi input
         $validatedData = $request->validate([
             'jadwal_kuliah' => ['required', Rule::in(['Pagi', 'Malam'])],
             'prodi_pilihan' => ['required', 'string', 'max:255'],
@@ -127,10 +185,6 @@ class AdminController extends Controller
         }
     }
 
-
-    /**
-     * Mengonfirmasi pendaftaran awal seorang user.
-     */
     public function confirmInitialRegistration(User $user)
     {
         try {
@@ -145,9 +199,6 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Mengonfirmasi pembayaran form pendaftaran seorang user.
-     */
     public function confirmPayment(User $user)
     {
         try {
@@ -167,9 +218,6 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Mengonfirmasi pembayaran daftar ulang seorang user.
-     */
     public function confirmReRegistration(User $user)
     {
         try {

@@ -13,13 +13,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Baris yang membuat 'Test User' sudah dihapus.
-        
-        // --- [PERUBAHAN DIMULAI DI SINI] ---
-        // Memanggil seeder admin agar akun admin dibuat.
-        $this->call([
-            AdminUserSeeder::class,
-        ]);
-        // --- [PERUBAHAN SELESAI DI SINI] ---
+        // Panggil seeder yang sudah ada
+        $this->call(AdminUserSeeder::class);
+
+        // --- [PENAMBAHAN] Panggil seeder baru untuk hak akses menu ---
+        $this->call(MenuPermissionSeeder::class);
     }
 }
