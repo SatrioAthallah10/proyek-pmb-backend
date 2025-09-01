@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\AdminController;
 
 // Rute Publik
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/register-rpl', [AuthController::class, 'registerRpl']);
+Route::post('/register-rpl', [AuthController::class, 'registerRpl']); // Rute ini sudah benar
 Route::post('/register-magister', [AuthController::class, 'registerMagister']);
 Route::post('/register-magister-rpl', [AuthController::class, 'registerMagisterRpl']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -35,21 +35,17 @@ Route::middleware('auth:sanctum')->group(function () {
 // Rute Admin
 Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
 
-    // --- [PENAMBAHAN] Rute untuk mengambil menu yang diizinkan ---
     Route::get('/my-menu', [AdminController::class, 'getMyMenuPermissions']);
 
-    // Grup Rute untuk Owner dan Kepala Bagian
     Route::middleware('role:owner,kepala_bagian')->group(function () {
         Route::get('/stats', [AdminController::class, 'getStats']);
     });
 
-    // Grup Rute untuk Staff dan Kepala Bagian
     Route::middleware('role:staff,kepala_bagian')->group(function () {
         Route::get('/users', [AdminController::class, 'index']);
         Route::put('/users/{user}/confirm-payment', [AdminController::class, 'confirmPayment']);
     });
 
-    // Grup Rute khusus untuk Kepala Bagian
     Route::middleware('role:kepala_bagian')->group(function () {
         Route::get('/users/{user}', [AdminController::class, 'getUserDetails']);
         Route::put('/users/{user}/confirm-initial-registration', [AdminController::class, 'confirmInitialRegistration']);
@@ -58,7 +54,6 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
         Route::put('/active-students/{user}/update-details', [AdminController::class, 'updateActiveStudentDetails']);
         Route::post('/register-staff', [AdminController::class, 'registerStaff']);
 
-        // --- [PENAMBAHAN] Rute baru untuk mengelola hak akses menu ---
         Route::get('/menu-permissions', [AdminController::class, 'getMenuPermissions']);
         Route::put('/menu-permissions', [AdminController::class, 'updateMenuPermissions']);
     });

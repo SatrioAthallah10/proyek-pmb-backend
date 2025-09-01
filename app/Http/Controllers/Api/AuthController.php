@@ -13,73 +13,106 @@ use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
-    // ... (method register, registerRpl, dan registerMagister tetap sama)
     public function register(Request $request)
-{
-    // 1. Menambahkan aturan validasi untuk field baru
-    $validator = Validator::make($request->all(), [
-        'nama' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:8',
-        'alamat' => 'nullable|string',
-        'jenisKelamin' => 'nullable|string',
-        'nomorTelepon' => 'nullable|string',
-        'sumberPendaftaran' => ['nullable', 'string', Rule::in([
-            'Brosur', 
-            'Pameran', 
-            'Sosialisasi/Kunjungan ITATS di Sekolah',
-            'Instagram',
-            'Facebook',
-            'TikTok',
-            'LinkedIn',
-            'Youtube',
-            'Whatsapp Blasting',
-            'Website ITATS',
-            'Guru BK', // <-- TAMBAHKAN OPSI INI
-            'Alumni ITATS', // <-- TAMBAHKAN OPSI INI
-            'Teman', 
-            'Tetangga/Saudara', // <-- TAMBAHKAN NILAI BARU INI
-            'Dosen ITATS', // <-- TAMBAHKAN NILAI BARU INI
-            'Mahasiswa ITATS', // <-- TAMBAHKAN NILAI BARU INI
-            'Brosur (DIGITAL)', // <-- TAMBAHKAN NILAI BARU INI
-            'Guru', // <-- TAMBAHKAN NILAI BARU INI
-            'Pengasuh Pondok Pesantren', // <-- TAMBAHKAN NILAI BARU INI
-            'Program Afirmasi Keluarga Wisudawan', // <-- TAMBAHKAN NILAI BARU INI
-            'Affiliate', // <-- TAMBAHKAN NILAI BARU INI
-        ])],
-        'nomorBrosur' => 'nullable|string', // Validasi untuk nomor brosur
-        'namaPemberiRekomendasi' => 'nullable|string', // <-- TAMBAHKAN INI
-        'nomorWaRekomendasi' => 'nullable|string',     // <-- TAMBAHKAN INI
-    ]);
+    {
+        // 1. Menambahkan aturan validasi untuk field baru
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'alamat' => 'nullable|string',
+            'jenisKelamin' => 'nullable|string',
+            'nomorTelepon' => 'nullable|string',
+            'sumberPendaftaran' => ['nullable', 'string', Rule::in([
+                'Brosur', 
+                'Pameran', 
+                'Sosialisasi/Kunjungan ITATS di Sekolah',
+                'Instagram',
+                'Facebook',
+                'TikTok',
+                'LinkedIn',
+                'Youtube',
+                'Whatsapp Blasting',
+                'Website ITATS',
+                'Guru BK',
+                'Alumni ITATS',
+                'Teman', 
+                'Tetangga/Saudara',
+                'Dosen ITATS',
+                'Mahasiswa ITATS',
+                'Brosur (DIGITAL)',
+                'Guru',
+                'Pengasuh Pondok Pesantren',
+                'Program Afirmasi Keluarga Wisudawan',
+                'Affiliate',
+            ])],
+            'nomorBrosur' => 'nullable|string',
+            'namaPemberiRekomendasi' => 'nullable|string',
+            'nomorWaRekomendasi' => 'nullable|string',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json($validator->errors(), 422);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        // 2. Menambahkan data baru saat membuat user
+        $user = User::create([
+            'name' => $request->nama,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'jalur_pendaftaran' => 'Sarjana Reguler',
+            'alamat' => $request->alamat,
+            'jenis_kelamin' => $request->jenisKelamin,
+            'no_ponsel' => $request->nomorTelepon,
+            'sumber_pendaftaran' => $request->sumberPendaftaran,
+            'nomor_brosur' => $request->nomorBrosur,
+            'nama_pemberi_rekomendasi' => $request->namaPemberiRekomendasi,
+            'nomor_wa_rekomendasi' => $request->nomorWaRekomendasi,
+        ]);
+
+        return response()->json(['message' => 'Registrasi berhasil!', 'user' => $user], 201);
     }
 
-    // 2. Menambahkan data baru saat membuat user
-    $user = User::create([
-        'name' => $request->nama,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'jalur_pendaftaran' => 'reguler', // Nilai default untuk jalur reguler
-        'alamat' => $request->alamat,
-        'jenis_kelamin' => $request->jenisKelamin,
-        'no_ponsel' => $request->nomorTelepon, // Perhatikan nama kolom 'no_ponsel'
-        'sumber_pendaftaran' => $request->sumberPendaftaran,
-        'nomor_brosur' => $request->nomorBrosur, // <-- TAMBAHKAN INI
-        'nama_pemberi_rekomendasi' => $request->namaPemberiRekomendasi, // <-- TAMBAHKAN INI
-        'nomor_wa_rekomendasi' => $request->nomorWaRekomendasi,         // <-- TAMBAHKAN INI
-    ]);
-
-    return response()->json(['message' => 'Registrasi berhasil!', 'user' => $user], 201);
-    }
-
+    /**
+     * [PERUBAHAN]
+     * Mengubah method registerRpl agar sama dengan method register,
+     * namun dengan 'jalur_pendaftaran' diatur sebagai 'Sarjana RPL'.
+     */
     public function registerRpl(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'alamat' => 'nullable|string',
+            'jenisKelamin' => 'nullable|string',
+            'nomorTelepon' => 'nullable|string',
+            'sumberPendaftaran' => ['nullable', 'string', Rule::in([
+                'Brosur', 
+                'Pameran', 
+                'Sosialisasi/Kunjungan ITATS di Sekolah',
+                'Instagram',
+                'Facebook',
+                'TikTok',
+                'LinkedIn',
+                'Youtube',
+                'Whatsapp Blasting',
+                'Website ITATS',
+                'Guru BK',
+                'Alumni ITATS',
+                'Teman', 
+                'Tetangga/Saudara',
+                'Dosen ITATS',
+                'Mahasiswa ITATS',
+                'Brosur (DIGITAL)',
+                'Guru',
+                'Pengasuh Pondok Pesantren',
+                'Program Afirmasi Keluarga Wisudawan',
+                'Affiliate',
+            ])],
+            'nomorBrosur' => 'nullable|string',
+            'namaPemberiRekomendasi' => 'nullable|string',
+            'nomorWaRekomendasi' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -89,11 +122,18 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->nama,
             'email' => $request->email,
-            'jalur_pendaftaran' => 'rpl',
             'password' => Hash::make($request->password),
+            'jalur_pendaftaran' => 'Sarjana RPL', // Mengatur jalur pendaftaran
+            'alamat' => $request->alamat,
+            'jenis_kelamin' => $request->jenisKelamin,
+            'no_ponsel' => $request->nomorTelepon,
+            'sumber_pendaftaran' => $request->sumberPendaftaran,
+            'nomor_brosur' => $request->nomorBrosur,
+            'nama_pemberi_rekomendasi' => $request->namaPemberiRekomendasi,
+            'nomor_wa_rekomendasi' => $request->nomorWaRekomendasi,
         ]);
 
-        return response()->json(['message' => 'Registrasi RPL berhasil!', 'user' => $user], 201);
+        return response()->json(['message' => 'Registrasi Sarjana RPL berhasil!', 'user' => $user], 201);
     }
 
     public function registerMagister(Request $request)
@@ -118,9 +158,6 @@ class AuthController extends Controller
         return response()->json(['message' => 'Registrasi Magister berhasil!', 'user' => $user], 201);
     }
 
-    /**
-     * Method baru khusus untuk registrasi Magister RPL.
-     */
     public function registerMagisterRpl(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -136,14 +173,13 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->nama,
             'email' => $request->email,
-            'jalur_pendaftaran' => 'magister-rpl', // Selalu diatur sebagai 'magister-rpl'
+            'jalur_pendaftaran' => 'magister-rpl',
             'password' => Hash::make($request->password),
         ]);
 
         return response()->json(['message' => 'Registrasi Magister RPL berhasil!', 'user' => $user], 201);
     }
 
-    // ... (method login dan logout tetap sama)
     public function login(Request $request)
     {
         $request->validate([
