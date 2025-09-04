@@ -61,8 +61,6 @@ class PendaftaranController extends Controller
     {
         $user = Auth::user();
 
-        // --- [PERBAIKAN] ---
-        // Memetakan setiap field secara manual untuk keamanan dan kejelasan
         $user->prodi_pilihan = $request->input('prodi_pilihan');
         $user->jadwal_kuliah = $request->input('jadwal_kuliah');
         $user->tahun_ajaran = $request->input('tahun_ajaran');
@@ -101,7 +99,6 @@ class PendaftaranController extends Controller
         $user->penghasilan_ibu = $request->input('penghasilan_ibu');
         $user->nomor_orang_tua = $request->input('nomor_orang_tua');
         
-        // Memperbarui status
         $user->pengisian_data_diri_status = 'Sudah Mengisi Data Diri';
         $user->pengisian_data_diri_completed = true;
         $user->npm_status = 'Menunggu Penerbitan NPM';
@@ -156,5 +153,22 @@ class PendaftaranController extends Controller
         $user->save();
 
         return response()->json(['message' => 'Pembayaran dikonfirmasi dan NPM berhasil dibuat.', 'npm' => $npm]);
+    }
+    
+    // --- PENAMBAHAN FUNGSI KHUSUS UNTUK RPL ---
+    public function submitPendaftaranAwalRpl(Request $request) {
+        return $this->submitPendaftaranAwal($request);
+    }
+    public function submitKonfirmasiPembayaranRpl(Request $request) {
+        return $this->submitKonfirmasiPembayaran($request);
+    }
+    public function submitHasilTesRpl(Request $request) {
+        return $this->submitHasilTes($request);
+    }
+    public function submitDaftarUlangRpl(Request $request) {
+        return $this->submitDaftarUlang($request);
+    }
+    public function submitKonfirmasiDafulRpl(Request $request) {
+        return $this->submitKonfirmasiDaful($request);
     }
 }
