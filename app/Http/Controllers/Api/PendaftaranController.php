@@ -31,6 +31,10 @@ class PendaftaranController extends Controller
         $user->jadwal_kuliah = $request->input('jadwal_kuliah');
         $user->tahun_ajaran = $request->input('tahun_ajaran');
 
+        // --- [PERBAIKAN DEFINITIF DI SINI] ---
+        // Memperbarui status utama yang sebelumnya hilang.
+        $user->status_pendaftaran = 'menunggu_pembayaran_formulir';
+        
         $user->formulir_pendaftaran_status = 'Sudah Mengisi Formulir';
         $user->formulir_pendaftaran_completed = true;
         $user->pembayaran_form_status = 'Belum Membayar';
